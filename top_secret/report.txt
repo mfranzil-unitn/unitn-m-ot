@@ -1,0 +1,10 @@
+For locating the images, I used the following command:
+
+sudo find / -iname "*intro*" > out.txt
+
+The out.txt was then grep-ped in order to locate the five jpeg files.
+
+The diskfree.txt file was obtained by piping out the output of the df -H command. 
+
+The CPU info was obtained with cat /proc/cpuinfo.
+

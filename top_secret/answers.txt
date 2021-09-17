@@ -1,0 +1,17 @@
+
+Matteo Franzil <matteo.franzil@studenti.unitn.it>
+otech2af
+221214
+
+ANSWERS
+
+
+Godzilla
+It Came From Outer Space
+2001 A Space Odyssey
+The Fly
+Forbidden Planet
+The var directory contains files that may be changed (e.g. logs, cache) and edited repeatedly
+The dev directory contains device files (along some special ones, like /dev/null), i.e. interfaces for writing to devices
+(see diskfree.txt)
+GenuineIntel 

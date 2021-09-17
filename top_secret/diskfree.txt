@@ -1,0 +1,11 @@
+otech2af@intro:~$ df -H
+Filesystem                                         Size  Used Avail Use% Mounted on
+udev                                               2.1G   50k  2.1G   1% /dev
+tmpfs                                              414M  6.8M  407M   2% /run
+/dev/sda1                                           17G  3.1G   13G  20% /
+tmpfs                                              2.1G     0  2.1G   0% /dev/shm
+tmpfs                                              5.3M     0  5.3M   0% /run/lock
+tmpfs                                              2.1G     0  2.1G   0% /sys/fs/cgroup
+users.isi.deterlab.net:/mnt/projects/proj/OffTech  3.1T  1.4T  1.5T  47% /proj/OffTech
+users.isi.deterlab.net:/mnt/other/users/otech2af   2.1T  1.5T  436G  78% /users/otech2af
+tmpfs                                              414M     0  414M   0% /run/user/19086
