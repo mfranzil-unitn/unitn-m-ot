@@ -1,0 +1,133 @@
+13a14,15
+>     mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+>     
+41c43,46
+<         $query = "SELECT * FROM accounts WHERE id = $id AND password = '$password'";
+---
+> 
+>         $query = "SELECT * FROM accounts WHERE id = ? AND password = ?";
+>         $stmt = $mysqli->prepare($query);
+>         $stmt->bind_param("is", $id, $password);
+43c48,50
+<         $result = $mysqli->query($query) or die($mysqli->error());
+---
+>         $stmt->execute();
+>         $result = $stmt->get_result();
+> 
+85,86c92,98
+<             $query = "SELECT * FROM accounts WHERE id = $id AND password = '$password'";
+<             $result = $mysqli->query($query) or die($mysqli->error());
+---
+>             $query = "SELECT * FROM accounts WHERE id = ? AND password = ?";
+>             $stmt = $mysqli->prepare($query);
+>             $stmt->bind_param("is", $id, $password);
+>             debug($query);
+>             $stmt->execute();
+>             $result = $stmt->get_result();
+> 
+90a103
+>             // does not need sanitization
+92c105
+<             $names = $mysqli->query($query) or die($mysqli->error());
+---
+>             $names = $mysqli->query($query);
+106c119,121
+<         $query = "SELECT id FROM accounts WHERE first = '$splitname[1]' AND last = '$splitname[0]'";
+---
+>         $stmt = $mysqli->prepare("SELECT id FROM accounts WHERE first = ? AND last = ?");
+>         $stmt->bind_param("ss", $splitname[1], $splitname[0]);
+>         $stmt->execute();
+108c123
+<         $result = $mysqli->query($query) or die($mysqli->error());
+---
+>         $result = $stmt->get_result();
+139,140c154,159
+<         $query = "SELECT bal FROM accounts WHERE password = '$password' AND id = $id";
+<         $result = $mysqli->query($query) or die($mysqli->error());
+---
+>         $query = "SELECT bal FROM accounts WHERE password = ? and id = ?";
+>         $stmt = $mysqli->prepare($query);
+>         $stmt->bind_param("si", $password, $id);
+>         debug($query);
+>         $stmt->execute();
+>         $result = $stmt->get_result();
+148,149c167,172
+<             $query = "UPDATE accounts SET bal = $giver_has WHERE password = '$password' AND id = $id LIMIT 1";
+<             $mysqli->query($query) or die($mysqli->error());
+---
+>             $query = "UPDATE accounts SET bal = ? WHERE password = ? AND id = ? LIMIT 1";
+>             $stmt = $mysqli->prepare($query);
+>             $stmt->bind_param("isi", $giver_has, $password, $id);
+>             debug($query);
+>             $stmt->execute();
+> 
+170c193,195
+<         $query = "SELECT bal FROM accounts WHERE password = '$password' AND id = $id";
+---
+>         $query = "SELECT bal FROM accounts WHERE password = ? and id = ?";
+>         $stmt = $mysqli->prepare($query);
+>         $stmt->bind_param("si", $password, $id);
+172c197,198
+<         $result = $mysqli->query($query) or die($mysqli->error());
+---
+>         $stmt->execute();
+>         $result = $stmt->get_result();
+179,180c205,208
+<             pretend("wire money", $amount, $bank, $acct);
+<             $query = "UPDATE accounts SET bal = $giver_has WHERE password = '$password' AND id = $id LIMIT 1";
+---
+>             pretend("wire money", $amount, $bank, $account);
+>             $query = "UPDATE accounts SET bal = ? WHERE password = ? AND id = ? LIMIT 1";
+>             $stmt = $mysqli->prepare($query);
+>             $stmt->bind_param("isi", $giver_has, $password, $id);
+182c210,211
+<             $mysqli->query($query) or die($mysqli->error());
+---
+>             $stmt->execute();
+>             
+208c237,239
+<         $query = "SELECT bal FROM accounts WHERE id = $giver_id";
+---
+>         $query = "SELECT bal FROM accounts WHERE id = ?";
+>         $stmt = $mysqli->prepare($query);
+>         $stmt->bind_param("i", $giver_id);
+210c241,242
+<         $result = $mysqli->query($query) or die($mysqli->error());
+---
+>         $stmt->execute();
+>         $result = $stmt->get_result();
+214,215c246,249
+< 
+<         $query = "SELECT bal FROM accounts WHERE id = $recipient_id";
+---
+>         
+>         $query = "SELECT bal FROM accounts WHERE id = ?";
+>         $stmt = $mysqli->prepare($query);
+>         $stmt->bind_param("i", $recipient_id);
+217c251,252
+<         $result = $mysqli->query($query) or die($mysqli->error());
+---
+>         $stmt->execute();
+>         $result = $stmt->get_result();
+226c261,264
+<             $query = "UPDATE accounts SET bal = $recipient_has WHERE id = $recipient_id LIMIT 1";
+---
+> 
+>             $query = "UPDATE accounts SET bal = ? WHERE id = ? LIMIT 1";
+>             $stmt = $mysqli->prepare($query);
+>             $stmt->bind_param("ii", $recipient_has, $recipient_id);
+228,229c266,270
+<             $mysqli->query($query) or die($mysqli->error());
+<             $query = "UPDATE accounts SET bal = $giver_has WHERE password = '$password' AND id = $giver_id LIMIT 1";
+---
+>             $stmt->execute();
+> 
+>             $query = "UPDATE accounts SET bal = ? WHERE password = ? AND id = ? LIMIT 1";
+>             $stmt = $mysqli->prepare($query);
+>             $stmt->bind_param("isi", $giver_has, $password, $giver_id);
+231c272,274
+<             $mysqli->query($query) or die($mysqli->error()); // does anyone know what it is?
+---
+>             $stmt->execute(); // does anyone know what it is?
+> 
+> 
