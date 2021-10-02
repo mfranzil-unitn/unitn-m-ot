@@ -127,7 +127,7 @@ With port forwarding now enabled, I visited the website on my browser and solved
   More on this question can be read in the following section.
 \end{enumerate}
 
-\section{Code issues}
+\section{Code issues and comments}
 
 As anticipated in the previous section, the code seems to have some major issues throughout. Some of them are pretty obvious and even pointed by comments: for example, there is a potential for integer overflow during bank transfers and subtraction of funds in the code. The major ones are, of course, related to SQL injections and the lack of a proper usage of prepared statements. In order to make the code really work and output actual issues instead of confused error messages, I removed all \verb=or die(mysql.error())= instances and added \verb=mysqli_report(MYSQLI_REPORT_ERROR= \verb=| MYSQLI_REPORT_STRICT);=, as suggested by \url{https://stackoverflow.com/questions/15318368/mysqli-or-die-does-it-have-to-die/15320411#15320411}. Finally, reducing the permissions given to the database user wired to the code would probably be a good idea.
 

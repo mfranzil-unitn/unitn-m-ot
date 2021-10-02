@@ -1,0 +1,72 @@
+3a4
+> use Cwd 'abs_path';
+101,127c102,137
+< 	my $memo = param('memo');
+< 	my $author = "root";
+< 	my @stat = stat $memo;
+< 	my $date = localtime $stat[9];
+< 	if ($memo =~ m#^/home/([^/]+)/.*$#) {
+< 		$author = $1;
+< 	}
+< 	print "<hr>\n";
+< 	print "<blockquote>";
+< 	print '<table border=1><tr><td>';
+< 	print "<center><b>$labels{$memo}</b></center>";
+< 	print '</td></tr>';
+< 	print "<tr><td>\n<p>";
+< 	print "<b>Author:</b> $author<br />\n";
+< 	print "<b>Subject:</b> $labels{$memo}<br />";
+< 	print "<b>Date:</b> $date<br />\n";
+< 	print "\n</p></td></tr>\n";
+< 	print "<tr><td><p>&nbsp;</p>\n";
+< 	print "<blockquote><p>\n";
+< 	
+< 	open (MEMO, $memo); # open the memo file
+< 	
+< 	my $line;
+< 	foreach $line (<MEMO>) {
+< 		# for every line in the memo, print it out
+< 		$line =~ s#\n$#</p><p>#; # replace newline characters with HTML
+< 		print "$line\n";
+---
+> 	my $memo = abs_path(param('memo'));
+> 
+> 	if ($memo !~ /^\/home\/.+?\/memo\/.+?$/ or $memo !~ /^\/root\/memo\/.+?$/) {
+> 		print "<hr>";
+> 		print "<h1>Error! Attack detected. Please try again.</h1>";
+> 	} else {
+> 		my $author = "root";
+> 		my @stat = stat $memo;
+> 		my $date = localtime $stat[9];
+> 		if ($memo =~ m#^/home/([^/]+)/.*$#) {
+> 			$author = $1;
+> 		}
+> 		print "<hr>\n";
+> 		print "<blockquote>";
+> 		print '<table border=1><tr><td>';
+> 		print "<center><b>$labels{$memo}</b></center>";
+> 		print '</td></tr>';
+> 		print "<tr><td>\n<p>";
+> 		print "<b>Author:</b> $author<br />\n";
+> 		print "<b>Subject:</b> $labels{$memo}<br />";
+> 		print "<b>Date:</b> $date<br />\n";
+> 		print "\n</p></td></tr>\n";
+> 		print "<tr><td><p>&nbsp;</p>\n";
+> 		print "<blockquote><p>\n";
+> 		open (MEMO, $memo); # open the memo file
+> 					
+> 		my $line;
+> 		foreach $line (<MEMO>) {
+> 			# for every line in the memo, print it out
+> 			$line =~ s#\n$#</p><p>#; # replace newline characters with HTML
+> 			print "$line\n";
+> 		}
+> 		print "</p></blockquote>\n";
+> 		print '<p>&nbsp;</p></td></tr></table>';
+> 		print "</blockquote>";
+> 		print "<hr>\n";
+129,132d138
+< 	print "</p></blockquote>\n";
+< 	print '<p>&nbsp;</p></td></tr></table>';
+< 	print "</blockquote>";
+< 	print "<hr>\n";
