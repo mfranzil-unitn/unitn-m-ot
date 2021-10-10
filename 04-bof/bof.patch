@@ -1,0 +1,31 @@
+87c87,93
+< 			char hdrval[1024]; // temporary return value
+---
+> 			int size;
+> 			if ((hdrend - hdrptr + 1) >= 1024) {
+> 				size = hdrend - hdrptr + 1;
+> 			} else {
+> 				size = 1024;
+> 			}
+> 			char hdrval[size]; // temporary return value
+92a99
+> 			free(hdrval);
+216c223,227
+< 	char sendmessage[BUFSIZE];
+---
+> 
+>     // Let's make it dynamic
+>     char *sendmessage;
+>     sendmessage = (char *)malloc((BUFSIZE) * sizeof(char));
+> 
+312a324,330
+> 
+> 		int total_length = strlen(sendmessage) + strlen(path) + strlen("</h2></body></html>");
+> 
+> 		if(total_length > BUFSIZE) {
+>             sendmessage = realloc(sendmessage, total_length);
+> 		}
+> 
+340a359,360
+> 
+>     free(sendmessage);
