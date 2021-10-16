@@ -1,4 +1,3 @@
-#Content-Disposition: attachment; filename="FileName"
 set ns [new Simulator]
 source tb_compat.tcl
 
