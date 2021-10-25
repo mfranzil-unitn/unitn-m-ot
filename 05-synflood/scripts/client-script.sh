@@ -9,6 +9,6 @@ EOF
 # sudo tcpdump -nn -i eth1
 
 chmod +x script.sh
-read -p "Press Enter to continue..."
+read -r -p "Press Enter to continue..."
 sudo tcpdump -nn -v -s0 -i ${ETH} -w cookie.pcap &
 ./script.sh
