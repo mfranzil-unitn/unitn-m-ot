@@ -251,8 +251,8 @@ Login to the \verb=attacker= machine.
 Using ettercap, your objective is to get the DNS query for \verb=www.google.com= to pass through the \verb=attacker=. Once you've accomplished this and confirmed that the desired traffic is now passing through the attacker, record each command you used and what each option in the command means.
 
 \begin{code}{Code used for perpetrating the DNS cache poisoning attack:}
-ettercap --text --iface eth0 --nosslmitm --nopromisc 
-    --only-mitm --mitm arp /10.1.2.2/// /10.1.2.3///
+**# ettercap --text --iface eth0 --nosslmitm --nopromisc **
+    **--only-mitm --mitm arp /10.1.2.2/// /10.1.2.3///**
 \end{code}
 
 \begin{theorem}
@@ -304,7 +304,7 @@ I opened the \verb=/etc/ettercap/etter.dns= and added the following:
 Then, I re-started ettercap with this setup:
 
 \begin{code}{Ettercap command.}
-**$ sudo ettercap --plugin dns_spoof --text --iface eth0 **
+**# ettercap --plugin dns_spoof --text --iface eth0 **
 **              --nosslmitm --nopromisc --mitm arp /10.1.2.2/// /10.1.2.3///**
 \end{code}
 
@@ -359,10 +359,10 @@ Finally, return to the client machine and use the command \verb=dig +dnssec www.
     First, we generate keys for both the ZSK and KSK.
     
 \begin{code}{Key generation.}
-**sudo dnssec-keygen -r /dev/urandom -a RSASHA256 -b 2048 -n ZONE google.com**
+**# dnssec-keygen -r /dev/urandom -a RSASHA256 -b 2048 -n ZONE google.com**
 ||# Generated file: Kgoogle.com.+008+24630||
-**sudo dnssec-keygen -r /dev/urandom -f KSK**
-                   -a RSASHA256 -b 2048 -n ZONE google.com
+**# dnssec-keygen -r /dev/urandom -f KSK**
+**                -a RSASHA256 -b 2048 -n ZONE google.com**
 ||# Generated file: Kgoogle.com.+008+25105||
 \end{code}
 
@@ -374,7 +374,7 @@ Finally, return to the client machine and use the command \verb=dig +dnssec www.
 ||; Keys to be published in DNSKEY RRset||
 ||$INCLUDE "/etc/bind/Kgoogle.com.+008+24630.key"     ; ZSK||
 ||$INCLUDE "/etc/bind/Kgoogle.com.+008+25105.key"     ; KSK||
-**$ sudo dnssec-signzone -x -o google.com google.com**
+**# dnssec-signzone -x -o google.com google.com**
 Verifying the zone using the following algorithms: RSASHA256.
 Zone fully signed:
 Algorithm: RSASHA256: KSKs: 1 active, 0 stand-by, 0 revoked
@@ -387,13 +387,13 @@ google.com.signed
 ||dnssec-enable yes;||
 ||dnssec-validation yes;||
 ||dnssec-lookaside auto;||
-**$ sudo rndc reconfig**
+**# rndc reconfig**
 \end{code}
 
 We can verify the output by running a dig locally.
 
 \begin{code}{Verifiying output locally.}
-**$ sudo dig +dnssec www.google.com A**
+**$ dig +dnssec www.google.com A**
 ; <<>> DiG 9.11.3-1ubuntu1.15-Ubuntu <<>> +dnssec www.google.com A
 ||[truncated output]||
 ;; flags: qr aa rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 2, ADDITIONAL: 3
