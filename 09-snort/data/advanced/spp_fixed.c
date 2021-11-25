@@ -33,31 +33,32 @@
  *
  */
 
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/types.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
+#include "sf_types.h"
 #include "preprocids.h"
-#include "sfPolicy.h"
-#include "sfPolicyUserData.h"
+#include "sf_snort_packet.h"
 #include "sf_dynamic_preproc_lib.h"
 #include "sf_dynamic_preprocessor.h"
-#include "sf_snort_packet.h"
-#include "sf_types.h"
 #include "snort_debug.h"
+#include "sfPolicy.h"
+#include "sfPolicyUserData.h"
 
 #define GENERATOR_EXAMPLE 256
-#define SRC_PORT_MATCH 1
+#define SRC_PORT_MATCH  1
 #define SRC_PORT_MATCH_STR "example_preprocessor: src port match"
-#define DST_PORT_MATCH 2
+#define DST_PORT_MATCH  2
 #define DST_PORT_MATCH_STR "example_preprocessor: dest port match"
 
-typedef struct _ExampleConfig {
+typedef struct _ExampleConfig
+{
     u_int16_t portToCheck;
 
 } ExampleConfig;
@@ -70,32 +71,35 @@ tSfPolicyUserContextId ex_swap_config = NULL;
 
 static void ExampleInit(char *);
 static void ExampleProcess(void *, void *);
-static ExampleConfig *ExampleParse(char *);
+static ExampleConfig * ExampleParse(char *);
 #ifdef SNORT_RELOAD
 static void ExampleReload(char *);
 static int ExampleReloadSwapPolicyFree(tSfPolicyUserContextId, tSfPolicyId, void *);
-static void *ExampleReloadSwap(void);
+static void * ExampleReloadSwap(void);
 static void ExampleReloadSwapFree(void *);
 #endif
 
-void ExampleSetup(void) {
+void ExampleSetup(void)
+{
 #ifndef SNORT_RELOAD
     _dpd.registerPreproc("dynamic_example", ExampleInit);
 #else
     _dpd.registerPreproc("dynamic_example", ExampleInit, ExampleReload,
-                         ExampleReloadSwap, ExampleReloadSwapFree);
+            ExampleReloadSwap, ExampleReloadSwapFree);
 #endif
 
     DEBUG_WRAP(DebugMessage(DEBUG_PLUGIN, "Preprocessor: Example is setup\n"););
 }
 
-static void ExampleInit(char *args) {
+static void ExampleInit(char *args)
+{
     ExampleConfig *config;
     tSfPolicyId policy_id = _dpd.getParserPolicy();
 
     _dpd.logMsg("Example dynamic preprocessor configuration\n");
 
-    if (ex_config == NULL) {
+    if (ex_config == NULL)
+    {
         ex_config = sfPolicyConfigCreate();
         if (ex_config == NULL)
             _dpd.fatalMsg("Could not allocate configuration struct.\n");
@@ -111,7 +115,8 @@ static void ExampleInit(char *args) {
     DEBUG_WRAP(DebugMessage(DEBUG_PLUGIN, "Preprocessor: Example is initialized\n"););
 }
 
-static ExampleConfig *ExampleParse(char *args) {
+static ExampleConfig * ExampleParse(char *args)
+{
     char *arg;
     char *argEnd;
     long port;
@@ -121,28 +126,34 @@ static ExampleConfig *ExampleParse(char *args) {
         _dpd.fatalMsg("Could not allocate configuration struct.\n");
 
     arg = strtok(args, " \t\n\r");
-    if (arg && !strcasecmp("port", arg)) {
+    if(arg && !strcasecmp("port", arg))
+    {
         arg = strtok(NULL, "\t\n\r");
-        if (!arg) {
+        if (!arg)
+        {
             _dpd.fatalMsg("ExamplePreproc: Missing port\n");
         }
 
         port = strtol(arg, &argEnd, 10);
-        if (port < 0 || port > 65535) {
+        if (port < 0 || port > 65535)
+        {
             _dpd.fatalMsg("ExamplePreproc: Invalid port %d\n", port);
         }
         config->portToCheck = (u_int16_t)port;
 
         _dpd.logMsg("    Port: %d\n", config->portToCheck);
-    } else {
+    }
+    else
+    {
         _dpd.fatalMsg("ExamplePreproc: Invalid option %s\n",
-                      arg ? arg : "(missing port)");
+            arg?arg:"(missing port)");
     }
 
     return config;
 }
 
-void ExampleProcess(void *pkt, void *context) {
+void ExampleProcess(void *pkt, void *context)
+{
     SFSnortPacket *p = (SFSnortPacket *)pkt;
     ExampleConfig *config;
 
@@ -151,7 +162,8 @@ void ExampleProcess(void *pkt, void *context) {
     if (config == NULL)
         return;
 
-    if (!p->ip4_header || p->ip4_header->proto != IPPROTO_TCP || !p->tcp_header) {
+    if (!p->ip4_header || p->ip4_header->proto != IPPROTO_TCP || !p->tcp_header)
+    {
         /* Not for me, return */
         return;
     }
@@ -188,7 +200,6 @@ void ExampleProcess(void *pkt, void *context) {
         // Copy back
         memcpy(p->payload, buf, actual_size);
         p->payload_size = actual_size;
-        return;
     }
 
     if (p->src_port == config->portToCheck) {
@@ -198,7 +209,8 @@ void ExampleProcess(void *pkt, void *context) {
         return;
     }
 
-    if (p->dst_port == config->portToCheck) {
+    if (p->dst_port == config->portToCheck)
+    {
         /* Destination port matched, log alert */
         _dpd.alertAdd(GENERATOR_EXAMPLE, DST_PORT_MATCH,
                       1, 0, 3, DST_PORT_MATCH_STR, 0);
@@ -207,13 +219,15 @@ void ExampleProcess(void *pkt, void *context) {
 }
 
 #ifdef SNORT_RELOAD
-static void ExampleReload(char *args) {
+static void ExampleReload(char *args)
+{
     ExampleConfig *config;
     tSfPolicyId policy_id = _dpd.getParserPolicy();
 
     _dpd.logMsg("Example dynamic preprocessor configuration\n");
 
-    if (ex_swap_config == NULL) {
+    if (ex_swap_config == NULL)
+    {
         ex_swap_config = sfPolicyConfigCreate();
         if (ex_swap_config == NULL)
             _dpd.fatalMsg("Could not allocate configuration struct.\n");
@@ -229,7 +243,8 @@ static void ExampleReload(char *args) {
     DEBUG_WRAP(DebugMessage(DEBUG_PLUGIN, "Preprocessor: Example is initialized\n"););
 }
 
-static int ExampleReloadSwapPolicyFree(tSfPolicyUserContextId config, tSfPolicyId policyId, void *data) {
+static int ExampleReloadSwapPolicyFree(tSfPolicyUserContextId config, tSfPolicyId policyId, void *data)
+{
     ExampleConfig *policy_config = (ExampleConfig *)data;
 
     sfPolicyUserDataClear(config, policyId);
@@ -237,7 +252,8 @@ static int ExampleReloadSwapPolicyFree(tSfPolicyUserContextId config, tSfPolicyI
     return 0;
 }
 
-static void *ExampleReloadSwap(void) {
+static void * ExampleReloadSwap(void)
+{
     tSfPolicyUserContextId old_config = ex_config;
 
     if (ex_swap_config == NULL)
@@ -249,7 +265,8 @@ static void *ExampleReloadSwap(void) {
     return (void *)old_config;
 }
 
-static void ExampleReloadSwapFree(void *data) {
+static void ExampleReloadSwapFree(void *data)
+{
     tSfPolicyUserContextId config = (tSfPolicyUserContextId)data;
 
     if (data == NULL)

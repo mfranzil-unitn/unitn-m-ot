@@ -3,26 +3,27 @@
 \usepackage{graphicx}
 \usepackage{url}
 \memoto{William H. Flathead III}
-\memofrom{Matteo Franzil}
-\memosubject{DNS and MiTM explaination}
+\memofrom{Matteo Franzil and Claudio Facchinetti}
+\memosubject{Snort explanation}
 \memodate{\today}
 \memologo{\includegraphics[height=4\baselineskip]{../../_global/marchio-unitn.png}}
 %\logo{\includegraphics[width=0.3\textwidth]{wp}}
 \begin{document}
 \maketitle
 
-I am writing this memo in order to explain the DNS and MiTM attacks. This is the latest related to the series of memos on vulnerability testing performed by my group.
+We am writing this memo to explain the last of our testbed projects here at Frobozz. This time, we chose to experiment a bit with intusion prevention systems and created a test network with Snort installed. In case you didn't know, Snort is an open-source software that can either sniff the traffic (\textit{IDS}) or sit in between and act prompty (\textit{IPS}). At the core it allows the creation of \textit{rules}, from very basic to elaborate, but it is a very sophisticated piece of software that allows basically any alteration and verification of incoming and outgoing traffic.
 
-This time, we decided to experiment on Frobozz's DNS server and see what would happen if an attacker were to perpetrate what's so called a MiTM (\textit{Man-in-The-Middle}) attack on our DNS infrastructure. As it stands, our internal DNS system has not been updated for the last 7 years, and is in dire need of maintainance. Still, for legitimate users it works flawlessly: the DNS requests are first sent to the cache server, then forwarded to the authoritative servers, and then the response is forwarded back to the client, recursively. 
+In the first part we managed to setup the simple network and started to look at the various packets flowing and noticed that a lot of unsecured packets were flowing through the network without any kind of control.
+We noticed that the \texttt{FileClient} applications were sending requests for files using a specified syntax and we tried the effectiveness of Snort simply making it log any request of an xml file. We also noticed that some files were not intended to be made available outside of a specific network, therefore we also created a Snort rule to prevent this behaviour.
 
-However, assume that an intruder was able to intercept the DNS requests. The malicious server would then send back a forged response, which will be forwarded back to the client. The client would then receive the forged response, which would be then interpreted as a legitimate DNS response, unaware of the fact that it was forged. By doing this, any attacker would be able to redirect clients, read the contents of their messages, and much more.
+After this we simulated some possible UDP flooding attack using the same tool presented in previous memos: while this was in place it was nearly impossible for any client to access the files on the \texttt{FileServer}.
+Again we mitigated this with a Snort rule which matched traffic and limited the amount of packets sent to the server if it realises that something suspicious is going on: with this in place the clients manage to reach the server in a reasonable time. The delay is due to the fact that the links are completely flooded.
+After this we also noticed that some of the machines were able to bypass Snort completely: we fixed it and also proposed some enhancements that could be done to enforce the overall security of the communications. With this we also pointed out that the Snort configuration should be adapted to the security improvements done.
 
-The first and foremost method for subverting a DNS system is by ARP spoofing. ARP spoofing refers to a technique in which attackers repeatedly send forged ARP packets to a victim - the cache server, pretending to be someone else - for example, the authoritative server. The victim' will believe to the ARP content and their cache will be poinsoned. The attacker will then be able to pretend to be the authoritative server, and thus, intercept any DNS requests directed from the cache to the server.
+As a last thing we discovered the source of the vulnerability in \texttt{FileServer} application which causes a remote attacker to gain remote code execution. In order to prevent this we firstly identified the conditions under which this gets exploited and then created a Snort rule to defend against this: be careful when assigning usernames, passwords, and file names since any string which matches those conditions gets dropped by Snort.
+After patching this we also discovrered that the rule could be bypassed using the "ASCII encoding" feature of the \texttt{FileServer}; to prevent this from happening we loaded a preprocessor on Snort to decode ASCII characters before applying any rule.
 
-Once the cache has been fully poisoned and the system has been set up in order to spoof DNS requests - which was done with a tool called \verb=ettercap= and a plugin called \verb=dns_spoof= - any request made from the client will now travel through the cache, the attacker, and then to the authoritative server, but no trace will be left of such a change in DNS responses, unless the client does a \verb=traceroute= and notices the extra hop.
-
-Mitigating this involves using what is called DNSSEC (\textit{DNS Security Extensions}). DNSSEC is a standard for adding authentication, but not confidentiality, to DNS. DNSSEC allows DNS resolvers to verify the integrity of the response with public key cryptography, ensuring it is not forged. Nonetheless, DNSSEC does not prevent DoS attacks, ARP spoofing or MiTM itself - attackers will still be able to see traffic in clear, as DNSSEC is still not encrypted. The main point is that DNS clients will be able to verify the chain of trust by checking the digital signature embedded in the response. protect against DoS attacks directly.
-
-In our testbed, we successfully run a test with the aformentioned setup (client, cache, attacker, auth-server), and we came to the conclusion that a migration to DNSSEC (or DNS-over-TLS, a different standard that does provide encryption) would be recommended to our system, in the wake of the recent attacks to webservers that may have let attackers into our network.
+At the current time it is impossible for us to say if there has been any kind of violation of the network since there is no packet filtering / logging at all but it would be naive to believe that none of the vulnerabilities / security issues has been exploited. In order to make this change and have in future the possibility to at least understand how some vulnerability has been exploited or simply an attacked performed our suggestion is to setup an NIDS as soon as possible so that critical services can be protected with specialized rules.
+This does not only allow for analysis after the attack has been performed but also offers a rather easy way to understand that something is wrong and react immediately.
 
 \end{document}
