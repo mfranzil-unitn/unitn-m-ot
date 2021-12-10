@@ -1,0 +1,19 @@
+#!/bin/bash
+
+eval "$(ssh-agent)"
+ssh-add .ssh/git
+
+SSH=ssh
+TARGETS=(client1 client2 client3)
+
+for MACHINE in "${TARGETS[@]}"
+do
+    alias "$MACHINE"="TERM=xterm $SSH $MACHINE.cctf-test1.offtech"
+done
+
+TARGETS=(gateway server)
+
+for MACHINE in "${TARGETS[@]}"
+do
+    alias "$MACHINE"="TERM=xterm $SSH $MACHINE.cctf-test3.offtech"
+done
