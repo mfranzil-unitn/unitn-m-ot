@@ -106,13 +106,13 @@ In the second shell, we can exploit the vulnerability as easily as sending an ar
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.5\textwidth]{drawable/large-get.png}
+  \includegraphics[width=0.5\textwidth]{../drawable/large-get.png}
   \caption{Exploiting the vulnerability with a 1050-byte-sized payload: the server crashes with a \textit{bad file descriptor} error.}
 \end{figure}
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.5\textwidth]{drawable/large-get-2.png}
+  \includegraphics[width=0.5\textwidth]{../drawable/large-get-2.png}
   \caption{Exploiting the vulnerability with a 10000-byte-sized payload: the server crashes with a \textit{segmentation fault} error.}
 \end{figure}
 
@@ -124,7 +124,7 @@ It is additionally possible to exploit the vulnerability via injecting shell cod
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.9\textwidth]{drawable/info-frame.png}
+  \includegraphics[width=0.9\textwidth]{../drawable/info-frame.png}
   \caption{Gathering information with \texttt{gdb}.}
 \end{figure}
 
@@ -147,9 +147,9 @@ For the shellcode, I used the Python library \verb=pwntools= to generate a prope
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.5\textwidth]{drawable/buffer-start-nop.png}
-  \includegraphics[width=0.5\textwidth]{drawable/buffer-mid-nop.png}
-  \includegraphics[width=0.5\textwidth]{drawable/buffer-end-nop.png}
+  \includegraphics[width=0.5\textwidth]{../drawable/buffer-start-nop.png}
+  \includegraphics[width=0.5\textwidth]{../drawable/buffer-mid-nop.png}
+  \includegraphics[width=0.5\textwidth]{../drawable/buffer-end-nop.png}
   \caption{Inspecting the shellcode with GDB (start of payload, start of shellcode, end of payload)}
 \end{figure}
 
@@ -159,13 +159,13 @@ After making the request, the now-compromised webserver will spawn a \verb=/bin/
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.5\textwidth]{drawable/connecting-to-bindshell.png}
+  \includegraphics[width=0.5\textwidth]{../drawable/connecting-to-bindshell.png}
   \caption{Connecting to our shell.}
 \end{figure}
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.5\textwidth]{drawable/executing-new-program.png}
+  \includegraphics[width=0.5\textwidth]{../drawable/executing-new-program.png}
   \caption{What we see on the other side: a new program being executed within the webserver, with \texttt{exec}.}
 \end{figure}
 
