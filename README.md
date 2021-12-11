@@ -6,7 +6,7 @@ This repo contains material about the following course:
 
 **Name**: Offensive Technologies
 
-**Teacher**: prof. Fabio Massacci
+**Teacher**: prof. Fabio Massacci, prof. Giorgio di Tizio
 
 **Course**: Computer Science (Master)
 
@@ -14,10 +14,17 @@ This repo contains material about the following course:
 
 ## Content
 
-You can find the following material in the repo:
+In the repo you will find the following material:
 
-* exercises/ - code for the exercises
+- `__global`: global files used by all reports
+- ten folders numbered from `00` to `09`: each folder represents an exercise in the first part of the course
+- two folders, `a1-resilient-server` and `a2-secure-server`, for the two Capture The Flags exercises
+- two folders, `b1-attack-pres` and `b2-defense-pres`, for the CTF presentations
+- a folder containing the final report: `c1-final-report`
 
 ## Authors
 
-* **Matteo Franzil** - *Initial work* - [mfranzil](https://github.com/mfranzil)
+- **Lorenzo Cavada** - *Initial work* - [LorenzoCavada](https://github.com/LorenzoCavada)
+- **Tommaso Sacchetti** - *Initial work* - [sacca97](https://github.com/sacca97)
+- **Dmytro Kashchuk** - *Initial work* - [DmytroKashchuk](https://github.com/DmytroKashchuk)
+- **Matteo Franzil** - *Initial work* - [mfranzil](https://github.com/mfranzil)
