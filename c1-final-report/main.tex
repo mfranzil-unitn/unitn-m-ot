@@ -1,0 +1,71 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage[left=2cm,right=2cm,top=2.5cm,bottom=2.5cm]{geometry} 
+
+\usepackage{titlesec} % Title formatting
+\usepackage{graphicx} % Better formatting for includegraphics
+\usepackage{caption} % Better caption support, with centering
+\usepackage{epsfig} % Support EPS figures
+\usepackage[shortlabels]{enumitem} % Change letters and numbers of enumerate
+\usepackage{xcolor} % Color support
+\usepackage[a-1b]{pdfx} % PDFA1-B
+\usepackage[pdfa]{hyperref} 
+\usepackage{soul} % Hyphenation for letterspacing, underlining, and more
+\usepackage{xurl} % URL formatting
+\usepackage{hyperref} % Add URL references
+
+\urlstyle{tt} % Url style
+
+% Better paragraph formatting
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+
+\titleformat{\section}{\normalfont\LARGE\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalfont\Large\bfseries}{\thesubsection}{.8em}{}
+\titleformat{\subsubsection}{\normalfont\large\bfseries}{\thesubsubsection}{.6em}{}
+%\titlespacing{\section}{0pt}{12pt plus 4pt minus 2pt}{5pt plus 2pt minus 2pt}
+%\titlespacing{\subsection}{0pt}{12pt plus 4pt minus 2pt}{5pt plus 2pt minus 2pt}
+%\titlespacing{\subsubsection}{0pt}{12pt plus 4pt minus 2pt}{5pt plus 2pt minus 2pt}
+
+\begin{document}
+\setlength{\parindent}{0pt}
+
+% Remove page numbers for the first pages
+\pagenumbering{gobble} 
+
+\input{chapters/-1_front}
+
+\tableofcontents
+\clearpage
+
+\begingroup
+
+% Page numbers yet again
+\pagenumbering{arabic}
+
+\input{chapters/0_executive_summary}
+\input{chapters/1_cctf_resilient}
+\input{chapters/2_cctf_secure}
+\input{chapters/3_team_roles}
+
+\endgroup
+
+\addcontentsline{toc}{section}{References}
+
+\bibliographystyle{IEEEtran-sorted-tt}
+\bibliography{biblio}
+
+\clearpage
+\newpage
+
+\addcontentsline{toc}{section}{Attachments}
+\renewcommand\thesubsection{\Alph{subsection}}
+\renewcommand\thesection{}
+
+\input{chapters/4_annex}
+
+\end{document}

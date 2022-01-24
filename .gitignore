@@ -4,6 +4,9 @@ upload.sh
 setup_server.sh.old
 attack/Makefile
 
+signatures
+etc/
+
 # General
 .DS_Store
 .AppleDouble
